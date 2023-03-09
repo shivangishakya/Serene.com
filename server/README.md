@@ -50,12 +50,12 @@ sudo nano /etc/hosts
 ### ENDPOINT 1: @app.route("/register/", methods=["POST"])
 This endpoint is used for registering a user/creating an account for a user to authenticate themselves.
 ex:
- http POST http://127.0.0.1:5000/register/ username=310 password=absd
+ http POST http://helloserene.com/register/ username=310 password=absd
 
 ### ENDPOINT 2: @app.route("/login/", methods=["POST"])
 This endpoint is used for logging in and authenticating a user, if their account already exists.
 ex:
- http --auth 310:absd --auth-type basic GET http://127.0.0.1:5000/login/
+ http --auth 310:absd --auth-type basic GET http://helloserene.com/login/
 After executing, the users table is checked to see if the specified user's account exists and authenticates if the password is correct.
 
 
