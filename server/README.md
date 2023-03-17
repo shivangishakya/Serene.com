@@ -58,4 +58,5 @@ ex:
  http --auth 310:absd --auth-type basic GET http://helloserene.com/login/
 After executing, the users table is checked to see if the specified user's account exists and authenticates if the password is correct.
 
+python3 request.py
 

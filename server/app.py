@@ -3,6 +3,13 @@ from flask_cors import CORS
 from functools import wraps
 from sqlite3 import dbapi2 as sqlite3
 import toml, sqlite3, textwrap
+import numpy as np
+import pickle, sklearn, pandas as pd, warnings
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.neighbors import KNeighborsClassifier
+
 
 
 ############################################################
@@ -14,6 +21,10 @@ import toml, sqlite3, textwrap
 app = Flask(__name__)
 app.config.from_file(f"./etc/users.toml", toml.load)
 CORS(app, resources={r'/*': {'origins': '*'}})
+
+# Load the model
+model = pickle.load(open('./static/model.pkl','rb'))
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 ############################################################
 #
@@ -80,6 +91,70 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def create_data(data):
+    res = []
+    list_cols = ['Academics', 'Looks_Fitness', 'Social_life', 'Xtra_curricular', 'Athletics', 'Career', 'Finance', 'Relationship', 'Cultural_Shock', 'Emotional_bullied', 'Physical_bullied', 'Verbal_bullied', 'Social_bullied', 'Cyber_bullied', 'International', 'Miss_home', 'Family_friends', 'Food', 'Sensory', 'Miss_social', 'Native_language', 'Courses', 'Loan', 'Stressed_commute']
+    for i in list_cols:
+        if i == 'Courses':
+            if data['Courses'] == 1:
+                res.append(1)
+                res.append(0)
+                res.append(0)
+                res.append(0)
+                res.append(0)
+                res.append(0)
+            elif data['Courses'] == 2:
+                res.append(0)
+                res.append(1)
+                res.append(0)
+                res.append(0)
+                res.append(0)
+                res.append(0)
+            elif data['Courses'] == 3:
+                res.append(0)
+                res.append(0)
+                res.append(1)
+                res.append(0)
+                res.append(0)
+                res.append(0)
+            elif data['Courses'] == 4:
+                res.append(0)
+                res.append(0)
+                res.append(0)
+                res.append(1)
+                res.append(0)
+                res.append(0)
+            elif data['Courses'] == 5:
+                res.append(0)
+                res.append(0)
+                res.append(0)
+                res.append(0)
+                res.append(1)
+                res.append(0)
+            elif data['Courses'] == 6:
+                res.append(0)
+                res.append(0)
+                res.append(0)
+                res.append(0)
+                res.append(1)
+                res.append(0)
+            else:
+                res.append(0)
+                res.append(0)
+                res.append(0)
+                res.append(0)
+                res.append(0)
+                res.append(0)
+        else:
+            if data[i] == 1:
+                res.append(1)
+                res.append(0)
+            else:
+                res.append(0)
+                res.append(1)
+    return res
+
+
 ############################################################
 #
 #                           APIs
@@ -130,3 +205,17 @@ def login():
     Headers = str(request.headers)
     return jsonify({"authenticated": "true" ,"Auth_Headers": Headers})
 
+############################################################
+#                    4. MODEL PREDICTION
+############################################################
+
+@app.route('/api',methods=['POST'])
+def predict():
+    # Get the data from the POST request.
+    data = request.get_json(force=True)
+    # Make prediction using model loaded from disk as per the data.
+    res = create_data(data)
+    prediction = model.predict([res])
+    # Take the first value of prediction
+    output = prediction[0]
+    return jsonify({"message:": str(output)})
