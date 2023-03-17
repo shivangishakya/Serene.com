@@ -27,8 +27,8 @@ foreman start
 NiginX
 Default config -> /usr/local/etc/nginx/nginx.conf
 New server:
-launchctl unload /usr/local/cellar/nginx/1.23.1/homebrew.mxcl.nginx.plist
-launchctl load /usr/local/cellar/nginx/1.23.1/homebrew.mxcl.nginx.plist
+launchctl unload /usr/local/cellar/nginx/1.23.3/homebrew.mxcl.nginx.plist
+launchctl load /usr/local/cellar/nginx/1.23.3/homebrew.mxcl.nginx.plist
 
 OR
 
