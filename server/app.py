@@ -33,7 +33,8 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 ############################################################
 
 def make_dicts(cursor, row):
-    return dict((cursor.description[idx][0], value) for idx, value in enumerate(row))
+    return dict((cursor.description[idx][0], value) for idx, \
+                value in enumerate(row))
 
 def get_db():
     db = getattr(g, "_database", None)
@@ -93,10 +94,20 @@ def login_required(f):
 
 def create_data(data):
     res = []
-    list_cols = ['Academics', 'Looks_Fitness', 'Social_life', 'Xtra_curricular', 'Athletics', 'Career', 'Finance', 'Relationship', 'Cultural_Shock', 'Emotional_bullied', 'Physical_bullied', 'Verbal_bullied', 'Social_bullied', 'Cyber_bullied', 'International', 'Miss_home', 'Family_friends', 'Food', 'Sensory', 'Miss_social', 'Native_language', 'Courses', 'Loan', 'Stressed_commute']
+    list_cols = ['Academics', 'Looks_Fitness', 'Social_life', \
+                 'Xtra_curricular', 'Athletics', 'Career', \
+                    'Finance', 'Relationship', 'Cultural_Shock',\
+                    'Emotional_bullied', 'Physical_bullied',\
+                    'Verbal_bullied', 'Social_bullied',\
+                    'Cyber_bullied', 'International',\
+                    'Miss_home', 'Family_friends',\
+                    'Food', 'Sensory', \
+                    'Miss_social', \
+                    'Native_language', 'Courses', 'Loan', \
+                    'Stressed_commute']
     for i in list_cols:
         if i == 'Courses':
-            if data['Courses'] == 1:
+            if data['Courses'] == 3:
                 res.append(1)
                 res.append(0)
                 res.append(0)
@@ -110,14 +121,14 @@ def create_data(data):
                 res.append(0)
                 res.append(0)
                 res.append(0)
-            elif data['Courses'] == 3:
+            elif data['Courses'] == 4:
                 res.append(0)
                 res.append(0)
                 res.append(1)
                 res.append(0)
                 res.append(0)
                 res.append(0)
-            elif data['Courses'] == 4:
+            elif data['Courses'] == 0:
                 res.append(0)
                 res.append(0)
                 res.append(0)
@@ -131,7 +142,7 @@ def create_data(data):
                 res.append(0)
                 res.append(1)
                 res.append(0)
-            elif data['Courses'] == 6:
+            elif data['Courses'] == 1:
                 res.append(0)
                 res.append(0)
                 res.append(0)
@@ -170,7 +181,9 @@ def home():
     return textwrap.dedent(
         """
         <h1>Welcome Students</h1>
-        <p>Don't Worry about Anything. Track your mental health by calculating your stress levels in just few minutes.</p>\n
+        <p>Don't Worry about Anything. Track your mental\
+              health by calculating your stress levels in \
+                just few minutes.</p>\n
         <p>So Start Now!!!</p>\n
     """
     )
