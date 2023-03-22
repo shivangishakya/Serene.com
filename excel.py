@@ -1,6 +1,7 @@
-from openpyxl import Workbook
+
 import openpyxl, random
 import pandas as pd
+from openpyxl import Workbook
 
 rbook = openpyxl.load_workbook('dataset.xlsx', data_only=True)
 
@@ -117,9 +118,9 @@ for i in range(2, count+1):
 
     data = rsheet.cell(row=i, column=5).value
     if "No, I don't miss my home" in data:
-        wsheet.cell(row=i, column=17).value = 1
-    else:
         wsheet.cell(row=i, column=17).value = 0
+    else:
+        wsheet.cell(row=i, column=17).value = 1
     if "Yes, Family and friends" in data:
         wsheet.cell(row=i, column=18).value = 1
     else:
@@ -182,35 +183,38 @@ for i in range(2, count+1):
 print(wsheet.cell(row=i, column=23))
 
 i += 1
-while i < 800002:
-    wsheet.cell(row=i, column=1).value = i - 1
-    for j in range(2, 26):
-        if j != 23:
-            wsheet.cell(row=i, column=j).value = random.randint(0,1)
-        else:
-            wsheet.cell(row=i, column=j).value = random.randint(0,5)
-    
-    if wsheet.cell(row=i, column=2).value == 1 and wsheet.cell(row=i, column=23).value > 3 \
-        and wsheet.cell(row=i, column=7).value == 1 and wsheet.cell(row=i, column=24).value == 1:
-        wsheet.cell(row=i, column=26).value = 5
-    elif (wsheet.cell(row=i, column=2).value == 1 and wsheet.cell(row=i, column=23).value > 3 \
-          and wsheet.cell(row=i, column=7).value == 1)\
-        or (wsheet.cell(row=i, column=24).value == 1 and wsheet.cell(row=i, column=7).value == 1):
-        wsheet.cell(row=i, column=26).value = 4
-    elif (wsheet.cell(row=i, column=2).value == 1 and wsheet.cell(row=i, column=23).value >= 3) \
-        or ((wsheet.cell(row=i, column=11).value == 1 or wsheet.cell(row=i, column=12).value == 1 \
-             or wsheet.cell(row=i, column=13).value == 1 or wsheet.cell(row=i, column=14).value == 1 \
-                or wsheet.cell(row=i, column=15).value == 1) and \
-                    (wsheet.cell(row=i, column=9).value == 1 or wsheet.cell(row=i, column=7).value == 1 \
-                     or wsheet.cell(row=i, column=8).value == 1)):
-        wsheet.cell(row=i, column=26).value = 3
-    else:
-        wsheet.cell(row=i, column=26).value = random.randint(1,2)    
-    i += 1
+while i < 205000:
+   wsheet.cell(row=i, column=1).value = i - 1
+   for j in range(2, 26):
+       if j != 23:
+           wsheet.cell(row=i, column=j).value = random.randint(0,1)
+       else:
+           wsheet.cell(row=i, column=j).value = random.randint(0,5)
+   
+   if wsheet.cell(row=i, column=2).value == 1 and wsheet.cell(row=i, column=23).value > 3 \
+       and wsheet.cell(row=i, column=7).value == 1 and wsheet.cell(row=i, column=24).value == 1:
+       wsheet.cell(row=i, column=26).value = 5
+   elif (wsheet.cell(row=i, column=2).value == 1 and wsheet.cell(row=i, column=23).value > 3 \
+         and wsheet.cell(row=i, column=7).value == 1)\
+       or (wsheet.cell(row=i, column=24).value == 1 and wsheet.cell(row=i, column=7).value == 1) \
+        or ((wsheet.cell(row=i, column=11).value == 1 or wsheet.cell(row=i, column=12).value == 1 or \
+            wsheet.cell(row=i, column=13).value == 1 or wsheet.cell(row=i, column=14).value == 1 or \
+                wsheet.cell(row=i, column=15).value == 1) and wsheet.cell(row=i, column=17).value == 1):
+       wsheet.cell(row=i, column=26).value = 4
+   elif (wsheet.cell(row=i, column=2).value == 1 and wsheet.cell(row=i, column=23).value >= 3) \
+       or ((wsheet.cell(row=i, column=11).value == 1 or wsheet.cell(row=i, column=12).value == 1 \
+            or wsheet.cell(row=i, column=13).value == 1 or wsheet.cell(row=i, column=14).value == 1 \
+               or wsheet.cell(row=i, column=15).value == 1) and \
+                   (wsheet.cell(row=i, column=9).value == 1 or wsheet.cell(row=i, column=7).value == 1 \
+                    or wsheet.cell(row=i, column=8).value == 1)) or wsheet.cell(row=i, column=25).value == 1:
+       wsheet.cell(row=i, column=26).value = 3
+   else:
+       wsheet.cell(row=i, column=26).value = random.randint(1,2)    
+   i += 1
 
 
-wbook.save("project_serene/server/static/dataset.xlsx")
-read_file = pd.read_excel ("project_serene/server/static/dataset.xlsx")
-read_file.to_csv ("project_serene/server/static/dataset.csv", 
+wbook.save("output.xlsx")
+read_file = pd.read_excel ("output.xlsx")
+read_file.to_csv ("output.csv", 
                   index = None,
                   header=True)
