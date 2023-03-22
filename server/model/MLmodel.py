@@ -56,9 +56,9 @@ print('Model accuracy score: {0:0.4f}'. format(accuracy_score(y_test, y_pred)))
 # Uncomment when changes in the data to generate new value of K
 # error_rate = []
 # for i in range(1,50):
-#     knn = KNeighborsClassifier(n_neighbors=i)
-#     knn.fit(X_train,y_train)
-#     pred_i = knn.predict(X_test)
+#     knn1 = KNeighborsClassifier(n_neighbors=i)
+#     knn1.fit(X_train,y_train)
+#     pred_i = knn1.predict(X_test)
 #     error_rate.append(np.mean(pred_i != y_test))
 # print("Minimum error:-",min(error_rate),"at K =",error_rate.index(min(error_rate))+1)
 
