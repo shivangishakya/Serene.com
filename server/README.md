@@ -58,5 +58,21 @@ ex:
  http --auth 310:absd --auth-type basic GET http://helloserene.com/login/
 After executing, the users table is checked to see if the specified user's account exists and authenticates if the password is correct.
 
+### ENDPOINT 4: @app.route("/predict", methods=["POST"])
+This endpoint is used for predicting the stress level.
+ex:
+http --auth 310:absd --auth-type basic POST http://127.0.0.1:3000/predict
+
+### ENDPOINT 4: @app.route("/insert-recipient", methods=["POST"])
+This endpoint is used for inserting recipient email.
+ex:
+http --auth 310:absd --auth-type basic POST http://127.0.0.1:3000/insert-recipient recipient=vatsalmakani@yahoo.com
+
+### ENDPOINT 5: @app.route("/generate-pdf", methods=["POST"])
+This endpoint is used for generating PDF for the report and sending to the recipient added.
+ex:
+http --auth 310:absd --auth-type basic POST http://127.0.0.1:3000/generate-pdf val=3
+
+
 python3 request.py
 
