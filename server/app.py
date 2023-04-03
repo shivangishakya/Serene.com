@@ -9,6 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
+import csv, openpyxl, requests
 
 
 
@@ -222,13 +223,160 @@ def login():
 #                    4. MODEL PREDICTION
 ############################################################
 
-@app.route('/api',methods=['POST'])
+@app.route('/predict',methods=['POST'])
 def predict():
     # Get the data from the POST request.
-    data = request.get_json(force=True)
+    data = request.json
     # Make prediction using model loaded from disk as per the data.
-    res = create_data(data)
-    prediction = model.predict([res])
+    features = [[data['Academics'], data['Looks_Fitness'], data['Social_life'], data['Xtra_curricular'], data['Athletics'], data['Career'], data['Finance'], data['Relationship'], data['Cultural_Shock'], data['Emotional_bullied'], data['Physical_bullied'], data['Verbal_bullied'], data['Social_bullied'], data['Cyber_bullied'], data['International'], data['Miss_home'], data['Family_friends'], data['Food'], data['Sensory'], data['Miss_social'], data['Native_language'], data['Courses'], data['Loan'], data['Stressed_commute']]]
+    prediction = model.predict(features)[0]
     # Take the first value of prediction
-    output = prediction[0]
-    return jsonify({"message:": str(output)})
+    response = {'prediction': int(prediction)}
+    return jsonify({"message:": str(response)})
+
+@app.route('/api/surveys',methods=['POST'])
+def surveys():
+    # Get the data from the POST request.
+    jsondata = request.get_json()
+    for i in range(len(jsondata)):
+        jsondata[i] = ''.join(jsondata[i])
+        
+    ques = ['Primary Reasons of Stress', 'Have you been bullied?', \
+            'Are you an International Student?', 'What do you miss the most about your home?',\
+                  'How many courses you have taken?', 'Financing the education', \
+                    'Is your commute to college stressful?']
+    wb = openpyxl.Workbook()
+    ws = wb.active
+
+    ws.append(ques)
+    ws.append(jsondata)
+
+    wb.save('quiz.xlsx')
+    rbook = openpyxl.load_workbook('quiz.xlsx', data_only=True)
+    rsheet = rbook.active
+
+    responses = {}
+    data = rsheet.cell(row=2, column=1).value
+    if "Academic" in data:
+        responses["Academics"] = 1
+    else:
+        responses["Academics"] = 0
+    if "fitness" in data:
+        responses["Looks_Fitness"] = 1
+    else:
+        responses["Looks_Fitness"] = 0
+    if "Social" in data:
+        responses["Social_life"] = 1
+    else:
+        responses["Social_life"] = 0
+    if "extra-curricular" in data:
+        responses["Xtra_curricular"] = 1
+    else:
+        responses["Xtra_curricular"] = 0
+    if "Athletic" in data:
+        responses["Athletics"] = 1
+    else:
+        responses["Athletics"] = 0
+    if "Career" in data:
+        responses["Career"] = 1
+    else:
+        responses["Career"] = 0
+    if "Financial" in data:
+        responses["Finance"] = 1
+    else:
+        responses["Finance"] = 0
+    if "Relationship" in data:
+        responses["Relationship"] = 1
+    else:
+        responses["Relationship"] = 0
+    if "Cultural" in data:
+        responses["Cultural_Shock"] = 1
+    else:
+        responses["Cultural_Shock"] = 0
+
+    data = rsheet.cell(row=2, column=2).value
+    if "Mentally/emotionally bullied" in data:
+        responses["Emotional_bullied"] = 1
+    else:
+        responses["Emotional_bullied"] = 0
+    if "Physically bullied" in data:
+        responses["Physical_bullied"] = 1
+    else:
+        responses["Physical_bullied"] = 0
+    if "Verbal bullying" in data:
+        responses["Verbal_bullied"] = 1
+    else:
+        responses["Verbal_bullied"] = 0
+    if "Social bullying" in data:
+        responses["Social_bullied"] = 1
+    else:
+        responses["Social_bullied"] = 0
+    if "Cyber bullying" in data:
+        responses["Cyber_bullied"] = 1
+    else:
+        responses["Cyber_bullied"] = 0
+
+    data = rsheet.cell(row=2, column=3).value
+    if "Yes" in data:
+        responses["International"] = 1
+    else:
+        responses["International"] = 0
+
+    data = rsheet.cell(row=2, column=4).value
+    if "No, I don't miss my home" in data:
+        responses["Miss_home"] = 0
+    else:
+        responses["Miss_home"] = 1
+    if "Yes, Family and friends" in data:
+        responses["Family_friends"] = 1
+    else:
+        responses["Family_friends"] = 0
+    if "Yes, Food" in data:
+        responses["Food"] = 1
+    else:
+        responses["Food"] = 0
+    if "Yes, Sensory experience of staying in home" in data:
+        responses["Sensory"] = 1
+    else:
+        responses["Sensory"] = 0
+    if "Yes, Social life of my hometown" in data:
+        responses["Miss_social"] = 1
+    else:
+        responses["Miss_social"] = 0
+    if "Yes, Native language conversations" in data:
+        responses["Native_language"] = 1
+    else:
+        responses["Native_language"] = 0
+    
+    data = rsheet.cell(row=2, column=5).value
+    if data == 1:
+        responses["Courses"] = 1
+    elif data == 2:
+        responses["Courses"] = 2
+    elif data == 3:
+        responses["Courses"] = 3
+    elif data == 4:
+        responses["Courses"] = 4
+    elif data == "More than 4":
+        responses["Courses"] = 5
+    else:
+        responses["Courses"] = 0
+
+    data = rsheet.cell(row=2, column=6).value
+    if "Loan" in data:
+        responses["Loan"] = 1
+    else:
+        responses["Loan"] = 0
+
+    data = rsheet.cell(row=2, column=7).value
+    if "Yes" in data or "Maybe" in data:
+        responses["Stressed_commute"] = 1
+    else:
+        responses["Stressed_commute"] = 0
+
+    url = 'http://localhost:3000/predict'
+    r = requests.post(url,json=responses)
+    print(r.json())
+
+    return data
+    
