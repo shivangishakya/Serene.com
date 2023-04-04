@@ -6,7 +6,7 @@ import toml, sqlite3, textwrap
 import pickle, warnings
 import requests
 from datetime import datetime
-import os
+import os, base64
 import weasyprint
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -160,30 +160,46 @@ def login():
 ############################################################
 
 @app.route('/predict',methods=['POST'])
+@login_required
 def predict():
     # Get the data from the POST request.
     data = request.json
+    auth = request.authorization
     # Make prediction using model loaded from disk as per the data.
     features = [[data['Academics'], data['Looks_Fitness'], data['Social_life'], data['Xtra_curricular'], data['Athletics'], data['Career'], data['Finance'], data['Relationship'], data['Cultural_Shock'], data['Emotional_bullied'], data['Physical_bullied'], data['Verbal_bullied'], data['Social_bullied'], data['Cyber_bullied'], data['International'], data['Miss_home'], data['Family_friends'], data['Food'], data['Sensory'], data['Miss_social'], data['Native_language'], data['Courses'], data['Loan'], data['Stressed_commute']]]
     prediction = model.predict(features)[0]
     # Take the first value of prediction
     response = {'prediction': int(prediction)}
+    query = "SELECT * FROM users"
+    users = query_db(query=query,)   
+    level = None
+    for user in users:
+        if auth.username == str(user["username"]):
+            level = user["level"]
+            break
+    query = """Update users set level = ?, prevlevel = ? where username = ?"""
+    data = (int(prediction), level, auth.username)
+    insert_query_db(query=query, args=data)
     return jsonify({"message:": str(response)})
 
 @app.route('/api/surveys',methods=['POST'])
+@login_required
 def surveys():
     # Get the data from the POST request.
-    jsondata = request.get_json()
+    jsondata = request.json['selectedOptions']
+    auth = request.authorization
     for i in range(len(jsondata)):
-        jsondata[i] = ''.join(jsondata[i])
-        
+        jsondata[i] = ''.join(jsondata[i])       
     responses = format_survey(jsondata)
-
+    # Encode the username and password in base64
+    credentials = f'{auth.username}:{auth.password}'
+    encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+    # Add the Authorization header to the request
+    headers = {'Authorization': f'Basic {encoded_credentials}'}
     url = 'http://localhost:3000/predict'
-    r = requests.post(url,json=responses)
+    r = requests.post(url,headers=headers, json=responses)
     print(r.json())
-
-    return r
+    return {"msg": "Thank You"}
 
 @app.route('/insert-recipient', methods=['POST'])
 @login_required
@@ -195,6 +211,19 @@ def insert_recp():
     insert_query_db(query=query, args=data)
     return jsonify({"msg": "INSERTED"})
 
+@app.route('/predicted-val', methods=['GET'])
+@login_required
+def predicted_val():
+    auth = request.authorization
+    query = "SELECT * FROM users"
+    users = query_db(query=query,) 
+    val = None
+    for user in users:
+        if auth.username == str(user["username"]):
+            val = user["level"]
+            break
+    print("############VALLLLL: ", val)
+    return str(val)
  
 @app.route('/generate-pdf', methods=['POST'])
 @login_required

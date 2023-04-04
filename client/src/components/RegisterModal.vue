@@ -42,11 +42,14 @@
   </template>
   
   <script>
+  import axios from 'axios';
+
   export default {
     data() {
       return {
         username: '',
-        password: '',
+        password1: '',
+        password2: '',
       }
     },
     methods: {
@@ -54,6 +57,19 @@
         // do something with the username and password
         console.log('Username:', this.username)
         console.log('Password:', this.password2)
+        const apiUrl = 'http://127.0.0.1:3000/register/';
+
+        axios.post(apiUrl, { "username":this.username, "password": this.password})
+          .then(response => {
+            // Handle the API response
+            console.log(response.data);
+            this.$router.push({ name: "LoginModal" });
+          })
+          .catch(error => {
+            // Handle the API error
+            console.error(error);
+            this.$router.push({ name: "Homepage" });
+          });
       }
     }
   }

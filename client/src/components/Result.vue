@@ -54,10 +54,16 @@
       };
     },
     mounted() {
-      axios.get('http://127.0.0.1:3000/')
+      const username = localStorage.getItem('username');
+      const password = localStorage.getItem('password');
+
+      const apiUrl = 'http://127.0.0.1:3000/predicted-val';
+      const encodedCredentials = btoa(`${username}:${password}`);
+      const headers = { 'Authorization': `Basic ${encodedCredentials}` };
+      axios.get(apiUrl, { headers })
         .then(response => {
           this.loading = false;
-          this.response = response.data;
+          this.response = response;
           this.createBarGraph();
         })
         .catch(error => {

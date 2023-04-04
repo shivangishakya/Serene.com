@@ -42,6 +42,8 @@
   </template>
   
   <script>
+  import axios from 'axios';
+
   export default {
     data() {
       return {
@@ -54,7 +56,28 @@
         // do something with the username and password
         console.log('Username:', this.username)
         console.log('Password:', this.password)
-        this.$router.push({ name: "SurveyR" });
+
+        // Store the username value in localStorage
+        localStorage.setItem('username', this.username);
+        localStorage.setItem('password', this.password);
+        const username = localStorage.getItem('username');
+        const password = localStorage.getItem('password');
+
+        const apiUrl = 'http://localhost:3000/login/';
+        const encodedCredentials = btoa(`${username}:${password}`);
+        const headers = { 'Authorization': `Basic ${encodedCredentials}` };
+
+        axios.get(apiUrl, { headers })
+          .then(response => {
+            // Handle the API response
+            console.log(response.data);
+            this.$router.push({ name: "SurveyR" });
+          })
+          .catch(error => {
+            // Handle the API error
+            console.error(error);
+            this.$router.push({ name: "Homepage" });
+          });
       }
     }
   }

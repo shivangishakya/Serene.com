@@ -142,13 +142,24 @@ export default {
   console.log(selectedOptions);
   this.completed = true;
 
-  try {
-    const response = await axios.post('http://127.0.0.1:3000/api/surveys', selectedOptions);
+  const username = localStorage.getItem('username');
+  const password = localStorage.getItem('password');
+
+  const apiUrl = 'http://127.0.0.1:3000/api/surveys';
+  const encodedCredentials = btoa(`${username}:${password}`);
+  const headers = { 'Authorization': `Basic ${encodedCredentials}` };
+
+  axios.post(apiUrl, { selectedOptions }, { headers })
+  .then(response => {
+    // Handle the API response
     console.log(response.data);
     this.completed = true;
-  } catch (error) {
+    this.$router.push({ name: "Result" });
+  })
+  .catch(error => {
+    // Handle the API error
     console.error(error);
-  }
+  });
     }
   }
 }
