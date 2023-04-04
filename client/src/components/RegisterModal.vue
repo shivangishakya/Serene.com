@@ -112,9 +112,9 @@
   
   .navbar-logo img {
     max-height: 70px;
-        max-width: 200px;
-        vertical-align: left;
-        border: 50;
+    max-width: 200px;
+    vertical-align: left;
+    border: 50;
   }
   
   .navbar-title {

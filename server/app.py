@@ -142,6 +142,19 @@ def create_user():
     insert_query_db(query, values)
     return jsonify({"authenticated": "true"})
 
+@app.route("/login/forgot-password/", methods=["POST"])
+def forgot_password():
+    data = request.get_json()
+    print (data)
+    if check_auth(data['email']) == False:
+        return jsonify({"message": "User Doesn't Exists"}), 401
+    user_data = f"{data['email']} {data['password']}"
+    app.logger.debug(user_data)
+    query = """Update users set password = ? where username = ?"""
+    data = (data['password'], data["email"])
+    insert_query_db(query=query, args=data)
+    return jsonify({"authenticated": "true"})
+
 ############################################################
 #                    3. USER LOGIN
 ############################################################
@@ -216,14 +229,18 @@ def insert_recp():
 def predicted_val():
     auth = request.authorization
     query = "SELECT * FROM users"
-    users = query_db(query=query,) 
-    val = None
+    users = query_db(query=query,)
+    resp = {}
     for user in users:
         if auth.username == str(user["username"]):
-            val = user["level"]
+            resp["level"] = int(user["level"])
+            if not user["prevlevel"]:
+                resp["prevlevel"] = 0
+            else:
+                resp["prevlevel"] = int(user["prevlevel"])
             break
-    print("############VALLLLL: ", val)
-    return str(val)
+    print("############VALLLLL: ", resp)
+    return jsonify(resp)
  
 @app.route('/generate-pdf', methods=['POST'])
 @login_required

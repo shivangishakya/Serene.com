@@ -10,17 +10,17 @@
       <div v-else>
         <p v-if="error">{{ error }}</p>
         <ul v-else>
-          <li v-for="item in response" :key="item.id">{{ item.title }}</li>
+          <h1>{{ responseData.level }}</h1>
         </ul>
       </div>
-      <h1>Bar Graph:</h1>
-      <div>
+      <!-- <h1>Bar Graph:</h1> -->
+      <div class="chart-container">
         <canvas ref="chart"></canvas>
       </div>
-      <h1>YouTube Videos:</h1>
+      <h1>Suggested Videos:</h1>
       <div class="video-grid">
         <div v-for="(video, index) in videos" :key="index" class="video-item">
-          <h3>{{ video.title }}</h3>
+          <!-- <h3>{{ video.title }}</h3> -->
           <div class="video-wrapper">
           <iframe width="560" height="315" :src="video.url" frameborder="0" allowfullscreen></iframe>
         </div>
@@ -31,15 +31,17 @@
   
   <script>
   import axios from 'axios';
-  import { Chart } from 'chart.js';
+  import Chart from 'chart.js/auto';
+
   
   export default {
     name: 'ApiBarGraphAndVideo',
     data() {
       return {
-        loading: true,
         error: null,
-        response: null,
+        loading: true,
+        responseData: {},
+        chartResponse: {},
         videos: [
           {
             title: 'Video 1',
@@ -49,60 +51,84 @@
             title: 'Video 2',
             url: 'https://www.youtube.com/embed/bsVlTy3GaJo'
           },
+          {
+            title: 'Video 2',
+            url: 'https://www.youtube.com/embed/bsVlTy3GaJo'
+          },
           
-        ]
+        ],
+        chart: null
       };
     },
+    created() {
+    const username = localStorage.getItem('username');
+    const password = localStorage.getItem('password');
+    // API call for response data
+    const apiUrl = 'http://127.0.0.1:3000/predicted-val';
+    const encodedCredentials = btoa(`${username}:${password}`);
+    const headers = { 'Authorization': `Basic ${encodedCredentials}` };
+    axios.get(apiUrl, { headers })
+      .then(response => {
+        this.loading = false;
+        this.responseData = response.data;
+        localStorage.setItem('level', this.responseData.level);
+        localStorage.setItem('prevlevel', this.responseData.prevlevel);
+        // this.drawBarChart();
+      })
+      .catch(error => {
+        this.loading = false;
+        this.error = error.message;
+      });
+    },
     mounted() {
-      const username = localStorage.getItem('username');
-      const password = localStorage.getItem('password');
-
-      const apiUrl = 'http://127.0.0.1:3000/predicted-val';
-      const encodedCredentials = btoa(`${username}:${password}`);
-      const headers = { 'Authorization': `Basic ${encodedCredentials}` };
-      axios.get(apiUrl, { headers })
-        .then(response => {
-          this.loading = false;
-          this.response = response;
-          this.createBarGraph();
-        })
-        .catch(error => {
-          this.loading = false;
-          this.error = error.message;
-        });
+      this.drawBarChart();
     },
     methods: {
-      createBarGraph() {
-        const chartData = {
-          labels: this.response.map(item => item.title),
-          datasets: [
-            {
-              label: 'API Data',
-              data: this.response.map(item => item.value),
-              backgroundColor: 'rgba(255, 99, 132, 0.2)',
-              borderColor: 'rgba(255, 99, 132, 1)',
-              borderWidth: 1
-            }
-          ]
-        };
-        const chartOptions = {
-          scales: {
-            y: {
-              beginAtZero: true
+      drawBarChart(){
+        const level = localStorage.getItem('level');
+        const prevlevel = localStorage.getItem('prevlevel');
+        console.log("hello", level, prevlevel)
+        if (typeof Chart !== 'undefined') {
+          const ctx = this.$refs.chart.getContext('2d');
+          this.chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: ['Previous Stress', 'Current Stress'],
+              datasets: [{
+                label: 'Stress Levels',
+                data: [prevlevel, level],
+                backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)'],
+                borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  precision: 0,
+                  stepSize: 5
+                }
+              }
             }
           }
-        };
-        new Chart(this.$refs.chart, {
-          type: 'bar',
-          data: chartData,
-          options: chartOptions
-        });
+          });
+        } else {
+          console.log('Chart.js is not defined');
+        }
       }
-    }
+    },
   };
-  </script>
+</script>
+
 
 <style>
+.chart-container {
+  width: 50%;
+  margin: 0 auto;
+}
+
 .video-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
