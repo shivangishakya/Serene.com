@@ -1,5 +1,16 @@
 <template>
     <div>
+      <div class="navbar">
+        <div class="navbar-left">
+          <div class="navbar-logo">
+            <img src="../assets/serenelogo.png" alt="Logo">
+          </div>
+          <div class="navbar-title">Serene.Com</div>
+        </div>
+        <div class="navbar-right">
+          <router-link to="/" class="navbar-link">Log Out</router-link>
+        </div>
+    </div>
         <div class="video-container">
         <video autoplay loop muted>
           <source src="../assets/result.mp4" type="video/mp4">
@@ -13,14 +24,12 @@
           <h1>{{ responseData.level }}</h1>
         </ul>
       </div>
-      <!-- <h1>Bar Graph:</h1> -->
       <div class="chart-container">
         <canvas ref="chart"></canvas>
       </div>
       <h1>Suggested Videos:</h1>
       <div class="video-grid">
         <div v-for="(video, index) in videos" :key="index" class="video-item">
-          <!-- <h3>{{ video.title }}</h3> -->
           <div class="video-wrapper">
           <iframe width="560" height="315" :src="video.url" frameborder="0" allowfullscreen></iframe>
         </div>
@@ -52,8 +61,8 @@
             url: 'https://www.youtube.com/embed/bsVlTy3GaJo'
           },
           {
-            title: 'Video 2',
-            url: 'https://www.youtube.com/embed/bsVlTy3GaJo'
+            title: 'Video 3',
+            url: 'https://www.youtube.com/embed/o0j9WlLhceM'
           },
           
         ],
@@ -63,6 +72,7 @@
     created() {
     const username = localStorage.getItem('username');
     const password = localStorage.getItem('password');
+
     // API call for response data
     const apiUrl = 'http://127.0.0.1:3000/predicted-val';
     const encodedCredentials = btoa(`${username}:${password}`);
@@ -73,6 +83,7 @@
         this.responseData = response.data;
         localStorage.setItem('level', this.responseData.level);
         localStorage.setItem('prevlevel', this.responseData.prevlevel);
+        console.log("HELLO: ", this.responseData.level, this.responseData.prevlevel)
         // this.drawBarChart();
       })
       .catch(error => {
@@ -87,7 +98,10 @@
       drawBarChart(){
         const level = localStorage.getItem('level');
         const prevlevel = localStorage.getItem('prevlevel');
-        console.log("hello", level, prevlevel)
+        console.log("HELLO1: ", level, prevlevel)
+        // localStorage.removeItem('level');
+        // localStorage.removeItem('prevlevel');
+
         if (typeof Chart !== 'undefined') {
           const ctx = this.$refs.chart.getContext('2d');
           this.chart = new Chart(ctx, {
@@ -124,6 +138,18 @@
 
 
 <style>
+.navbar-link {
+  padding: 10px 20px;
+  background-color: #333;
+  color: #fff;
+  text-decoration:wavy;
+  border-radius: 5px;
+}
+
+.navbar-link:hover {
+  background-color: #555;
+}
+
 .chart-container {
   width: 50%;
   margin: 0 auto;

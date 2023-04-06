@@ -1,1 +1,1 @@
-api: flask run -p 3000
+api: flask run -p 3000 --debug

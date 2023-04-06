@@ -10,6 +10,7 @@ import RegisterModal from "@/components/RegisterModal.vue";
 import SurveyR from "@/components/SurveyR.vue";
 import Result from "@/components/Result.vue";
 import ForgotPass from "@/components/ForgotPass.vue"
+import AfterLogin from "@/components/AfterLogin.vue"
 
 const routes = [
     {
@@ -41,6 +42,11 @@ const routes = [
         path: "/forgot-password",
         name: "ForgotPass",
         component: ForgotPass,        
+    },
+    {
+        path: "/welcome",
+        name: "AfterLogin",
+        component: AfterLogin,        
     }
 ];
 

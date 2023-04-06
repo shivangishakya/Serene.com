@@ -32,9 +32,6 @@
   </template>
   
   <script>
-  // import LoginModal from 'LoginModal.vue';
-  // import { useRouter } from 'vue-router';
-
   export default {
     name: 'HomePage',
     metaInfo: {
@@ -101,10 +98,16 @@
   }
   
   .navbar-link {
-    margin-left: 10px;
-    font-size: 18px;
-    cursor: pointer;
-  }
+  padding: 10px 20px;
+  background-color: #333;
+  color: #fff;
+  text-decoration:wavy;
+  border-radius: 5px;
+}
+
+.navbar-link:hover {
+  background-color: #555;
+}
   
   .content {
     position: relative;

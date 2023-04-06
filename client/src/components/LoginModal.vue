@@ -71,7 +71,7 @@
           .then(response => {
             // Handle the API response
             console.log(response.data);
-            this.$router.push({ name: "SurveyR" });
+            this.$router.push({ name: "AfterLogin" });
           })
           .catch(error => {
             // Handle the API error
@@ -84,6 +84,18 @@
   </script>
   
   <style>
+  .navbar-link {
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    text-decoration:wavy;
+    border-radius: 5px;
+  }
+
+  .navbar-link:hover {
+    background-color: #555;
+  }
+  
   .video-container {
     position: fixed;
     top: 0;

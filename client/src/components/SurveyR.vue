@@ -1,5 +1,16 @@
 <template>
   <div>
+    <div class="navbar">
+        <div class="navbar-left">
+          <div class="navbar-logo">
+            <img src="../assets/serenelogo.png" alt="Logo">
+          </div>
+          <div class="navbar-title">Serene.Com</div>
+        </div>
+        <div class="navbar-right">
+          <router-link to="/" class="navbar-link">Log Out</router-link>
+        </div>
+    </div>
     <div class="page-title" :style="{ backgroundColor: backgroundColor }">
       <h2>{{ survey.title }}</h2>
     </div>
@@ -166,6 +177,18 @@ export default {
 </script>
 
 <style scoped>
+
+.navbar-link {
+  padding: 10px 20px;
+  background-color: #333;
+  color: #fff;
+  text-decoration:wavy;
+  border-radius: 5px;
+}
+
+.navbar-link:hover {
+  background-color: #555;
+}
 .page-title {
   background-color: #007bff;
   color: #d56363;
