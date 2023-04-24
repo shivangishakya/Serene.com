@@ -148,12 +148,32 @@ def forgot_password():
     print (data)
     if check_auth(data['email']) == False:
         return jsonify({"message": "User Doesn't Exists"}), 401
-    user_data = f"{data['email']} {data['password']}"
-    app.logger.debug(user_data)
-    query = """Update users set password = ? where username = ?"""
-    data = (data['password'], data["email"])
-    insert_query_db(query=query, args=data)
-    return jsonify({"authenticated": "true"})
+    # user_data = f"{data['email']} {data['password']}"
+    # app.logger.debug(user_data)
+    # query = """Update users set password = ? where username = ?"""
+    query = "SELECT * FROM users"
+    users = query_db(query=query,)
+    password = ""
+    for user in users:
+        if data["email"] == str(user["username"]):
+            password = str(user["password"])
+            break
+    msg = MIMEMultipart()
+    msg['From'] = 'shivangi.shakya@gmail.com'
+    msg['To'] = data["email"]
+    msg['Subject'] = "Serene Password"
+
+    # Attach PDF file to email
+    message = "Dear Sir/Madam" + ",\n\nYour password is: " + password + "\n\nBest regards,\nThe Serene Team"
+    msg.attach(MIMEText(message))
+
+    # Send the email
+    smtp = smtplib.SMTP('smtp-relay.sendinblue.com', 587)
+    smtp.starttls()
+    smtp.login('shivangi.shakya@gmail.com', 'xhJgW92yLczt1M5D')
+    smtp.sendmail(msg['From'], msg['To'], msg.as_string())
+    smtp.quit()
+    return jsonify({"msg": "Password Sent"})
 
 ############################################################
 #                    3. USER LOGIN
@@ -171,6 +191,25 @@ def login():
 ############################################################
 #                    4. MODEL PREDICTION
 ############################################################
+
+@app.route('/api/surveys',methods=['POST'])
+@login_required
+def surveys():
+    # Get the data from the POST request.
+    jsondata = request.json['selectedOptions']
+    auth = request.authorization
+    for i in range(len(jsondata)):
+        jsondata[i] = ''.join(jsondata[i])       
+    responses = format_survey(jsondata)
+    # Encode the username and password in base64
+    credentials = f'{auth.username}:{auth.password}'
+    encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+    # Add the Authorization header to the request
+    headers = {'Authorization': f'Basic {encoded_credentials}'}
+    url = 'http://localhost:3000/predict'
+    r = requests.post(url,headers=headers, json=responses)
+    print(r.json())
+    return {"msg": "Thank You"}
 
 @app.route('/predict',methods=['POST'])
 @login_required
@@ -195,34 +234,38 @@ def predict():
     insert_query_db(query=query, args=data)
     return jsonify({"message:": str(response)})
 
-@app.route('/api/surveys',methods=['POST'])
-@login_required
-def surveys():
-    # Get the data from the POST request.
-    jsondata = request.json['selectedOptions']
-    auth = request.authorization
-    for i in range(len(jsondata)):
-        jsondata[i] = ''.join(jsondata[i])       
-    responses = format_survey(jsondata)
-    # Encode the username and password in base64
-    credentials = f'{auth.username}:{auth.password}'
-    encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
-    # Add the Authorization header to the request
-    headers = {'Authorization': f'Basic {encoded_credentials}'}
-    url = 'http://localhost:3000/predict'
-    r = requests.post(url,headers=headers, json=responses)
-    print(r.json())
-    return {"msg": "Thank You"}
+############################################################
+#                    5. INSERT RECIPIENT INFO
+############################################################
 
 @app.route('/insert-recipient', methods=['POST'])
 @login_required
 def insert_recp():
     recp = request.get_json()
+    print("USERTTT: ", recp, ",".join(recp))
     auth = request.authorization
     query = """Update users set recipient = ? where username = ?"""
-    data = (recp["recipient"], auth.username)
+    data = (",".join(recp), auth.username)
+    # data = (",".join(recp), "310")
     insert_query_db(query=query, args=data)
     return jsonify({"msg": "INSERTED"})
+
+@app.route('/get-recipient', methods=['GET'])
+@login_required
+def get_recp():
+    auth = request.authorization
+    query = "SELECT * FROM users"
+    users = query_db(query=query,) 
+    for user in users:
+        if auth.username == str(user["username"]):
+            recipient = user["recipient"]
+            break
+    print("GET: ",recipient.split(","))
+    return recipient.split(",")
+
+############################################################
+#                    6. GET STRESS LEVELS FOR GRAPHS
+############################################################
 
 @app.route('/predicted-val', methods=['GET'])
 @login_required
@@ -241,6 +284,10 @@ def predicted_val():
             break
     print("############VALLLLL: ", resp)
     return jsonify(resp)
+
+############################################################
+#                    7. GENERATE PDF AND SEND EMAIL
+############################################################
  
 @app.route('/generate-pdf', methods=['POST'])
 @login_required
@@ -255,11 +302,15 @@ def generate_pdf():
         if auth.username == str(user["username"]):
             recp = user["recipient"]
             break
-    print(recp)
-    if recp is None or recp == "":
-        return "RECIPIENT EMAIL IS EMPTY"
+    if not recp:
+        return 400
+    emails = recp.split(",")
+    print(emails)
+    print(request.get_json())
+    val = int(request.get_json()["level"])
 
-    val = int(request.get_json()["val"])
+    if any(emails) == False or recp == "" or recp is None:
+        return 501
 
     html = '''
     <html>
@@ -281,23 +332,58 @@ def generate_pdf():
     '''.format(auth.username, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), val, stress_desc(val)[0], stress_desc(val)[1], stress_desc(val)[2], stress_desc(val)[3], stress_desc(val)[4])
 
     pdf = weasyprint.HTML(string=html).write_pdf()
+    message = "Dear Sir/Madam" + ",\n\nPlease find the attached Stress Report\n\nBest regards,\nThe Serene Team"
 
+    for i in emails:
     # Create the email message
-    msg = MIMEMultipart()
-    msg['From'] = 'shivangi.shakya@gmail.com'
-    msg['To'] = str(recp)
-    msg['Subject'] = 'PDF Generated'
+        msg = MIMEMultipart()
+        msg['From'] = 'shivangi.shakya@gmail.com'
+        msg['To'] = str(i)
+        msg['Subject'] = 'PDF Generated'
 
-    # Attach PDF file to email
-    part = MIMEApplication(pdf, Name="report.pdf")
-    part['Content-Disposition'] = 'attachment; filename="report.pdf"'
-    msg.attach(part)
+        # Attach PDF file to email
+        part = MIMEApplication(pdf, Name="report.pdf")
+        part['Content-Disposition'] = 'attachment; filename="report.pdf"'
+        msg.attach(part)
+        msg.attach(MIMEText(message))
 
-    # Send the email
-    smtp = smtplib.SMTP('smtp-relay.sendinblue.com', 587)
-    smtp.starttls()
-    smtp.login('shivangi.shakya@gmail.com', 'xhJgW92yLczt1M5D')
-    smtp.sendmail(msg['From'], msg['To'], msg.as_string())
-    smtp.quit()
+        # Send the email
+        smtp = smtplib.SMTP('smtp-relay.sendinblue.com', 587)
+        smtp.starttls()
+        smtp.login('shivangi.shakya@gmail.com', 'xhJgW92yLczt1M5D')
+        smtp.sendmail(msg['From'], msg['To'], msg.as_string())
+        smtp.quit()
 
     return 'Email sent with PDF attachment!'
+
+############################################################
+#                    8. USER INFORMATION
+############################################################
+@app.route('/get-user-info', methods=['GET'])
+@login_required
+def get_user_info():
+    auth = request.authorization
+    query = "SELECT * FROM users"
+    users = query_db(query=query,)
+    resp = {}
+    for user in users:
+        if auth.username == str(user["username"]):
+            resp["name"] = str(user["name"])
+            resp["phone"] = str(user["phone"])
+            resp["address"] = str(user["address"])
+            break
+    print("USER INFO: ", resp)
+    return jsonify(resp)
+
+@app.route('/put-user-info', methods=['POST'])
+@login_required
+def put_user_info():
+    auth = request.authorization
+    resp = request.get_json()
+    query = "SELECT * FROM users"
+    auth = request.authorization
+    query = """Update users set name = ?, phone = ?, address = ? where username = ?"""
+    data = (resp["name"], resp["phone"], resp["address"], auth.username)
+    # data = (",".join(recp), "310")
+    insert_query_db(query=query, args=data)
+    return jsonify({"msg": "INSERTED"})

@@ -1,4 +1,21 @@
 <template>
+  <div>
+    <div class="video-container">
+      <video autoplay muted loop>
+        <source src="../assets/relax-3.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="navbar">
+        <div class="navbar-left">
+          <div class="navbar-logo">
+            <img src="../assets/serenelogo.png" alt="Logo">
+          </div>
+          <div class="navbar-title">Serene.Com</div>
+        </div>
+        <div class="navbar-right">
+          <button class="navbar-link" @click="homepage">Back</button>
+        </div>
+    </div>
     <div class="video-container">
         <video autoplay loop muted>
           <source src="../assets/relax2.mp4" type="video/mp4">
@@ -7,7 +24,7 @@
     <div class="forgot-password">
       <h2 class="title">Forgot Password</h2>
       <form class="form" @submit.prevent="submitForm">
-        <label for="email" class="label">Email</label>
+        <!-- <label for="email" class="label">Email</label> -->
         <input
           type="email"
           id="email"
@@ -16,29 +33,16 @@
           placeholder="Enter your email"
           required
         />
-        <input
-          type="password"
-          id="password1"
-          class="input"
-          placeholder="Enter password"
-          required
-        />
-        <input
-          type="password"
-          id="password2"
-          class="input"
-          placeholder="Verify password"
-          required
-        />
         <button type="submit" class="btn">Submit</button>
       </form>
-      <div v-if="showSuccessMessage" class="success-message">
+      <!-- <div v-if="showSuccessMessage" class="success-message">
         Password Reset.
       </div>
       <div v-if="showErrorMessage" class="error-message">
         Failed to reset password. Please try again later.
-      </div>
+      </div> -->
     </div>
+  </div>
   </template>
   
   <script>
@@ -48,33 +52,22 @@
     data() {
       return {
         email: '',
-        password2: '',
-        showSuccessMessage: false,
-        showErrorMessage: false
       };
     },
     methods: {
+      homepage() {
+        window.location.href = '/';
+      },
       submitForm() {
-        // Call API to send password reset request
-        // Replace the following code with your actual API call
-        // You can use libraries like axios or fetch to make the API call
-        // Example:
         const apiUrl = 'http://127.0.0.1:3000/login/forgot-password/';
-        axios.post(apiUrl, { email: this.email,  password: this.password2})
+        axios.post(apiUrl, { email: this.email})
           .then(response => {
-            // Show success message
-            this.showSuccessMessage = true;
-            this.showErrorMessage = false;
+            alert("Password Sent")
           })
           .catch(error => {
             // Show error message
-            this.showSuccessMessage = false;
-            this.showErrorMessage = true;
+            alert("No Email Id")
           });
-  
-        // Placeholder code to show success message for demo purposes
-        // this.showSuccessMessage = true;
-        // this.showErrorMessage = false;
       }
     }
   };

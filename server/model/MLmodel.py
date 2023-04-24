@@ -8,10 +8,10 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 sns.set(color_codes=True)
 
 dataset = pd.read_csv("./static/dataset.csv")
-print("Shape of Data:", dataset.shape)
+# print("Shape of Data:", dataset.shape)
 
 # Dataset Information
-print(dataset.info())
+# print(dataset.info())
 
 # Prepare the Data
 X = dataset.drop(['Student ID', 'Stress_rating'], axis=1)

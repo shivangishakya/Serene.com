@@ -8,7 +8,9 @@
           <div class="navbar-title">Serene.Com</div>
         </div>
         <div class="navbar-right">
-          <router-link to="/" class="navbar-link">Log Out</router-link>
+          <button class="navbar-link" @click="welcomepage">Back</button>
+          <button class="navbar-link" @click="handleLogout">Log Out</button>
+          <!-- <router-link to="/" class="navbar-link">Log Out</router-link> -->
         </div>
     </div>
     <div class="page-title" :style="{ backgroundColor: backgroundColor }">
@@ -22,7 +24,7 @@
             <li v-for="(option, optionIndex) in question.options" :key="optionIndex" @click="respondToQuestion(index, optionIndex)">
               <input v-if="question.type === 'radio'" type="radio" :id="'option-' + index + '-' + optionIndex" :name="'question-' + index" :value="optionIndex" :checked="question.response === optionIndex">
               <input v-else type="checkbox" :id="'option-' + index + '-' + optionIndex" :value="optionIndex" v-model="question.response">
-              <label :for="'option-' + index + '-' + optionIndex" :style="{ color: textColor }">{{ option.text }}</label>
+              <label :for="'option-' + index + '-' + optionIndex" :style="{ color: textColor, marginLeft: '10px' }">({{ String.fromCharCode(97+optionIndex) }}) {{ option.text }}</label>
             </li>
           </ul>
         </div>
@@ -136,6 +138,13 @@ export default {
     }
   },
   methods: {
+    handleLogout() {
+      localStorage.clear();
+      window.location.href = '/';
+    },
+    welcomepage() {
+        window.location.href = '/welcome';
+    },
     respondToQuestion(questionIndex, optionIndex) {
       if (this.survey.questions[questionIndex].type === 'radio') {
         this.survey.questions[questionIndex].response = optionIndex
@@ -203,16 +212,18 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  /* align-items: center; */
+  padding-left: 10%;
   height: 300vh;
   text-align: left;
-  max-height: calc(230vh - 30px); /* subtract the height of the page-title and button */
-  overflow-y: auto; /* enable vertical scrolling when content exceeds max-height */
+  max-height: calc(300vh - 30px);
+  overflow-y: auto; 
 }
 
 .question {
   margin-bottom: 20px;
   margin-left: 1rem;
+  margin: right 10px;
   padding: 5px 20px;
 }
 
@@ -229,11 +240,6 @@ ul {
   li {
     margin-bottom: 10px;
     cursor: pointer;
-  }
-  
-  input[type="radio"],
-  input[type="checkbox"] {
-    margin-right: 10px;
   }
   
   button {

@@ -23,8 +23,9 @@
          <h2 class="register-title">New User Registration</h2>
          <form>
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" v-model="username">
+                <label for="email">Username</label>
+                <input type="email" id="email" name="username" v-model="username" pattern=".+@.+" required>
+                <span v-if="!isValidEmail">Please enter a valid email address.</span>
             </div>
             <div class="form-group">
                 <label for="password1">Password</label>
@@ -50,9 +51,13 @@
         username: '',
         password1: '',
         password2: '',
+        showErrorMessage: false
       }
     },
     methods: {
+      isValidEmail() {
+      return /\S+@\S+\.\S+/.test(this.email);
+    },
       submitForm() {
         // do something with the username and password
         console.log('Username:', this.username)

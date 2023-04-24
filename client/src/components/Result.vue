@@ -8,7 +8,9 @@
           <div class="navbar-title">Serene.Com</div>
         </div>
         <div class="navbar-right">
-          <router-link to="/" class="navbar-link">Log Out</router-link>
+          <button class="navbar-link" @click="callApi">Send Report</button>
+          <button class="navbar-link" @click="welcomepage">Back</button>
+          <button class="navbar-link" @click="handleLogout">Log Out</button>
         </div>
     </div>
         <div class="video-container">
@@ -21,12 +23,26 @@
       <div v-else>
         <p v-if="error">{{ error }}</p>
         <ul v-else>
-          <h1>{{ responseData.level }}</h1>
+          <h1>{{ String(parseInt(responseData.level) * 100/5) + "% corresponds to level: " + responseData.level }}</h1>
         </ul>
       </div>
       <div class="chart-container">
         <canvas ref="chart"></canvas>
       </div>
+      <div class="description">
+          <p>"It is impossible to live without failing at something unless you live so 
+            cautiously that you might as well not have lived at all, in which case you
+             have failed by default." - J. K. Rowling</p>
+          <p>
+            Don’t dwell on the past or think too much about the future. 
+            There are times when it is nice to reminisce or when it is important 
+            to make plans for our future, but one of the best ways to stop worrying 
+            is to take things one day at a time. Practice mindfulness to increase your
+             self-awareness and improve your psychological well-being by becoming more
+              present in your own environment. Living in the present will help you 
+              cherish each moment and make the most of your day.
+          </p>
+          </div>
       <h1>Suggested Videos:</h1>
       <div class="video-grid">
         <div v-for="(video, index) in videos" :key="index" class="video-item">
@@ -84,7 +100,6 @@
         localStorage.setItem('level', this.responseData.level);
         localStorage.setItem('prevlevel', this.responseData.prevlevel);
         console.log("HELLO: ", this.responseData.level, this.responseData.prevlevel)
-        // this.drawBarChart();
       })
       .catch(error => {
         this.loading = false;
@@ -95,12 +110,34 @@
       this.drawBarChart();
     },
     methods: {
+      handleLogout() {
+      localStorage.clear();
+      window.location.href = '/';
+      },
+      welcomepage() {
+        window.location.href = '/welcome';
+    },
+      async callApi() {
+      const username = localStorage.getItem('username');
+      const password = localStorage.getItem('password');
+      const level = localStorage.getItem('level');
+
+      const apiUrl = 'http://127.0.0.1:3000/generate-pdf';
+      const encodedCredentials = btoa(`${username}:${password}`);
+      const headers = { 'Authorization': `Basic ${encodedCredentials}` };
+      try {
+        const response = await axios.post(apiUrl, {level}, { headers });
+        console.log(response.data);
+        alert("Email Sent Successfully")
+      } catch (error) {
+        console.error(error);
+        alert("Please go Back->Add Recipient and add recipient Email Addresses")
+      }
+    },
       drawBarChart(){
         const level = localStorage.getItem('level');
         const prevlevel = localStorage.getItem('prevlevel');
         console.log("HELLO1: ", level, prevlevel)
-        // localStorage.removeItem('level');
-        // localStorage.removeItem('prevlevel');
 
         if (typeof Chart !== 'undefined') {
           const ctx = this.$refs.chart.getContext('2d');
@@ -138,6 +175,16 @@
 
 
 <style>
+    .description {
+    background-color: white;
+    text-align: center;
+    padding: 2rem;
+    border-radius: 100rem;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    margin-top: 2rem;
+    margin-left: 10%;
+    max-width: 80%;
+    }
 .navbar-link {
   padding: 10px 20px;
   background-color: #333;

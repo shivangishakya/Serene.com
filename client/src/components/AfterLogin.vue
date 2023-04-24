@@ -13,7 +13,7 @@
           <div class="navbar-title">Serene.Com</div>
         </div>
         <div class="navbar-right">
-          <router-link to="/" class="navbar-link">Log Out</router-link>
+          <button @click="handleLogout" class="navbar-link">Log Out</button>
         </div>
     </div>
     <div class="background">
@@ -21,9 +21,9 @@
         <!-- <h1>Our Services</h1> -->
         <ul class="services">
           <li @click="redirectTo('http://localhost:8080/survey')">Calculate Your Stress</li>
-          <li @click="redirectTo('https://example.com/service2')">Manage Profile</li>
-          <li @click="redirectTo('https://example.com/service3')">Add Recipient</li>
-          <li @click="redirectTo('https://www.helpguide.org/')">Mental Health Guide</li>
+          <li @click="redirectTo('http://localhost:8080/user')">Manage Profile</li>
+          <li @click="redirectTo('http://localhost:8080/recipient')">Add Recipient</li>
+          <li @click="openLinkInNewTab">Mental Health Guide</li>
         </ul>
       </div>
     </div>
@@ -36,6 +36,14 @@
       redirectTo(url) {
         window.location.href = url;
       },
+      openLinkInNewTab() {
+      const link = 'https://www.helpguide.org/';
+      window.open(link, '_blank');
+    },
+    handleLogout() {
+      localStorage.clear();
+      window.location.href = '/';
+    }
     },
   };
   </script>
